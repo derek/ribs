@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>ribs.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="Changelog.html">
+                Changelog.md
+              </a>
+            
+              
+              <a class="source" href="README.html">
+                README.md
+              </a>
+            
+              
+              <a class="source" href="todos.html">
+                todos.js
+              </a>
+            
+              
+              <a class="source" href="hotkeys.html">
+                hotkeys.coffee
+              </a>
+            
+              
+              <a class="source" href="ribs.html">
+                ribs.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>ribs.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">do</span> ($=jQuery) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Make <code>Ribs</code> globally accessible.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>root = window ? module.exports
+    Ribs = root.Ribs ?= {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p><code>Ribs.List</code> is the primary Ribs component.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">List</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">View</span></span>
+  
+        tagName: <span class="string">"div"</span>
+    
+        itemName: <span class="string">"item"</span>
+    
+        _ribsEvents: 
+            <span class="string">'keypress'</span> : <span class="string">'keypressed'</span>
+            <span class="string">'focusin'</span> : <span class="string">'focusin'</span>
+            <span class="string">'focusout'</span> : <span class="string">'focusout'</span>
+            <span class="string">'click .header .toggle input'</span> : <span class="string">'toggleSelected'</span>
+            <span class="string">'click .maximize .minimize'</span> : <span class="string">'toggleVisibility'</span>
+            <span class="string">'click [data-sort-by]'</span> : <span class="string">'sortByField'</span>
+
+        _ribsOptions: [<span class="string">"displayAttributes"</span>, <span class="string">"actions"</span>, <span class="string">"itemView"</span>, <span class="string">"itemName"</span>, <span class="string">"title"</span>, <span class="string">"jumpkey"</span>]
+
+        jumpSelector : <span class="string">".list li:first"</span>
+    
+        focussed : <span class="literal">false</span>
+
+        selectedByDefault : <span class="literal">false</span>
+
+        renderOrder: [<span class="string">"Title"</span>, <span class="string">"Actions"</span>, <span class="string">"Header"</span>, <span class="string">"List"</span>, <span class="string">"Footer"</span>]
+    
+        constructor : (options) -&gt;
+    
+            <span class="property">@sortArrows</span> = {}
+            <span class="property">@sortArrows</span>[-<span class="number">1</span>] = <span class="string">"↓"</span>
+            <span class="property">@sortArrows</span>[<span class="number">1</span>] = <span class="string">"↑"</span>
+
+            <span class="property">@itemView</span> ?= Ribs.ListItem
+            <span class="property">@actionView</span> ?= Ribs.BatchAction
+    
+            <span class="property">@events</span> = _.extend {}, <span class="property">@events</span>, <span class="property">@_ribsEvents</span>
+
+            <span class="property">@sortingDirection</span> = {}
+            <span class="property">@sortingBy</span> = <span class="string">"id"</span>
+
+            @[k] = options[k] <span class="keyword">for</span> k <span class="keyword">in</span> <span class="property">@_ribsOptions</span> <span class="keyword">when</span> options[k]?</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Lazily construct global keyboard manager, if found</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@keyboardManager</span> = Ribs.getKeyboardManager?()
+
+            <span class="property">@initializeHotKeys</span>() <span class="keyword">if</span> <span class="property">@keyboardManager</span>?
+
+            <span class="keyword">super</span>
+
+            <span class="property">@$el</span>.addClass(<span class="string">'ribs'</span>)
+
+        setElement: -&gt;
+            <span class="keyword">super</span>
+            <span class="property">@build</span>()
+
+        remove: -&gt;
+            <span class="property">@removeAllSubviews</span>()
+            <span class="property">@keyboardManager</span>?.deregisterView <span class="property">@keyboardNamespace</span>
+            <span class="keyword">super</span>
+
+        removeAllSubviews: -&gt;
+            <span class="property">@removeSubviews</span> <span class="string">"list"</span>
+            <span class="property">@removeSubviews</span> <span class="string">"action"</span>
+
+        removeSubviews: (type) -&gt;
+            <span class="keyword">if</span> l = <span class="property">@subviews</span>(type)
+                <span class="keyword">for</span> subview <span class="keyword">in</span> l
+                    subview.remove()
+            @[<span class="string">"_<span class="subst">#{type}</span>Subviews"</span>] = []
+
+        subviews: (type) -&gt;
+            @[<span class="string">"_<span class="subst">#{type}</span>Subviews"</span>]
+
+
+        build: -&gt;
+
+            <span class="property">@removeAllSubviews</span>()
+            <span class="property">@$el</span>.empty()
+
+            <span class="keyword">for</span> t <span class="keyword">in</span> <span class="property">@renderOrder</span>
+                l = t.replace <span class="regexp">/^./</span>, <span class="string">"$<span class="subst">#{t[<span class="number">0</span>].toLowerCase()}</span>"</span>
+                @[l] = @[<span class="string">"initialize<span class="subst">#{t}</span>"</span>]() <span class="keyword">unless</span> @[<span class="string">"suppress<span class="subst">#{t}</span>"</span>] <span class="keyword">or</span> @[l]?
+                <span class="property">@$el</span>.append @[l]
+            
+            <span class="property">@setCollection</span> <span class="property">@collection</span> <span class="keyword">if</span> <span class="property">@collection</span>?
+
+        render: -&gt;
+            <span class="keyword">for</span> t <span class="keyword">in</span> <span class="property">@renderOrder</span>
+                @[<span class="string">"render<span class="subst">#{t}</span>"</span>]() <span class="keyword">unless</span> @[<span class="string">"suppress<span class="subst">#{t}</span>"</span>]
+            <span class="keyword">this</span>
+        
+        setCollection: (collection)-&gt;
+            <span class="property">@collection</span> = collection</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Unbind all events</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@stopListening</span> <span class="property">@collection</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Bind events to collection</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@listenTo</span> <span class="property">@collection</span>, <span class="string">"add"</span>, <span class="property">@addItem</span>
+            <span class="property">@listenTo</span> <span class="property">@collection</span>, <span class="string">"sort reset"</span>, <span class="property">@addAllItems</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>rerender actions, footer, header etc. when list selection changes</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">for</span> t <span class="keyword">in</span> [<span class="string">"Actions"</span>, <span class="string">"Footer"</span>, <span class="string">"Header"</span>]
+                fn = @[<span class="string">"render<span class="subst">#{t}</span>"</span>]
+                <span class="keyword">if</span> <span class="keyword">not</span> @[<span class="string">"suppress<span class="subst">#{t}</span>"</span>] <span class="keyword">and</span> _.isFunction fn
+                    <span class="property">@listenTo</span> <span class="property">@collection</span>, <span class="string">"selected deselected add remove"</span>, fn</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>render everything on reset</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@listenTo</span> <span class="property">@collection</span>, <span class="string">"reset"</span>, <span class="property">@render</span>
+
+            <span class="property">@addAllItems</span>()
+
+            <span class="property">@updateHeaderArrows</span> <span class="property">@sortingBy</span> <span class="keyword">unless</span> <span class="property">@suppressHeader</span>
+
+
+        getSelected : -&gt;
+            <span class="keyword">return</span> [] <span class="keyword">unless</span> <span class="property">@$list</span>?
+            <span class="property">@$list</span>.find(<span class="string">".item.selected"</span>).map (idx, el) =&gt;
+                <span class="property">@collection</span>.get $(el).data(<span class="string">"cid"</span>)
+
+        getDeselected: -&gt;
+            <span class="keyword">return</span> [] <span class="keyword">unless</span> <span class="property">@$list</span>?
+            <span class="property">@$list</span>.find(<span class="string">".item:not(.selected)"</span>).map (idx, el) =&gt;
+                <span class="property">@collection</span>.get $(el).data(<span class="string">"cid"</span>)
+
+        getNumSelected: -&gt;
+            <span class="keyword">return</span> <span class="number">0</span> <span class="keyword">unless</span> <span class="property">@$list</span>?
+            <span class="property">@$list</span>.find(<span class="string">".item.selected"</span>).size()
+
+        getNumDeselected: -&gt;
+            <span class="keyword">return</span> <span class="number">0</span> <span class="keyword">unless</span> <span class="property">@$list</span>?
+            <span class="property">@$list</span>.find(<span class="string">".item:not(.selected)"</span>).size()
+
+        getNumTotal: -&gt;
+            <span class="keyword">return</span> <span class="number">0</span> <span class="keyword">unless</span> <span class="property">@collection</span>?
+            <span class="property">@collection</span>.length
+            
+        toggleFocussedSelected: -&gt;
+            <span class="keyword">unless</span> <span class="property">@suppressToggle</span>
+                <span class="property">@$</span>(<span class="string">".item:focus"</span>).trigger <span class="string">"toggle"</span>
+
+        toggleSelected : (e)-&gt;
+            <span class="keyword">if</span> <span class="property">@selectedByDefault</span> <span class="keyword">is</span> <span class="literal">true</span> 
+                <span class="property">@$list</span>.find(<span class="string">".item.selected"</span>).trigger <span class="string">"deselectitem"</span>, silent: <span class="literal">true</span>
+                <span class="property">@selectedByDefault</span> = <span class="literal">false</span>
+                <span class="property">@collection</span>?.trigger <span class="string">"deselected"</span>
+            <span class="keyword">else</span>
+                <span class="property">@$list</span>.find(<span class="string">".item:not(.selected)"</span>).trigger <span class="string">"selectitem"</span>, silent: <span class="literal">true</span>
+                <span class="property">@selectedByDefault</span> = <span class="literal">true</span>
+                <span class="property">@collection</span>?.trigger <span class="string">"selected"</span>
+
+        invertSelected : -&gt;
+            toSelect = <span class="property">@$list</span>.find(<span class="string">":not(.item.selected)"</span>)
+            toDeselect = <span class="property">@$list</span>.find(<span class="string">".item.selected"</span>)
+            toSelect.trigger <span class="string">"select"</span>
+            toDeselect.trigger <span class="string">"deselectitem"</span>
+    
+        toggleVisibility : -&gt;
+            <span class="property">@$header</span>.find(<span class="string">".maximize, .minimize"</span>).toggle()
+
+            <span class="property">@$el</span>.toggleClass <span class="string">"minimized"</span>, <span class="number">100</span>
+
+        sortByField: (event) -&gt;
+            field = $(event.target).attr <span class="string">"data-sort-by"</span>
+            <span class="keyword">if</span> field? <span class="keyword">and</span> <span class="property">@collection</span>?
+                old_field = <span class="property">@sortingBy</span>
+                <span class="property">@sortingBy</span> = field
+
+                <span class="keyword">if</span> field <span class="keyword">is</span> old_field <span class="keyword">and</span> field <span class="keyword">of</span> <span class="property">@sortingDirection</span>
+                    <span class="property">@sortingDirection</span>[field] *= -<span class="number">1</span> <span class="comment"># toggle direction</span>
+                <span class="keyword">else</span>
+                    <span class="property">@sortingDirection</span>[field] = <span class="number">1</span>
+
+                dir = <span class="property">@sortingDirection</span>[field]
+
+                <span class="property">@sortCollection</span> field, dir
+
+                <span class="property">@updateHeaderArrows</span> field, old_field
+			
+        sortCollection: (field, dir) -&gt;
+
+            <span class="keyword">if</span> <span class="property">@collection</span>.remoteSort
+                <span class="property">@collection</span>.trigger <span class="string">'remoteSort'</span>, field, dir
+            <span class="keyword">else</span>
+                <span class="property">@collection</span>.<span class="function"><span class="title">comparator</span></span> = (ma,mb)=&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>first check if it is a top level attribute</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>a = ma.get field
+                    da = <span class="property">@displayAttributeMap</span>[field]
+                    <span class="keyword">if</span> _.isFunction da.map
+                        a = da.map.call @, a, ma
+
+                    b = mb.get field
+                    db = <span class="property">@displayAttributeMap</span>[field]
+                    <span class="keyword">if</span> _.isFunction db.map
+                        b = db.map.call @, b, mb</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>make string sorting case insensitive</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>a = a.toLowerCase() <span class="keyword">if</span> a?.toLowerCase?
+                    b = b.toLowerCase() <span class="keyword">if</span> b?.toLowerCase?
+
+                    <span class="keyword">return</span>  <span class="number">0</span>     <span class="keyword">if</span> a <span class="keyword">is</span> b
+                    <span class="keyword">return</span> +<span class="number">1</span>*dir <span class="keyword">if</span> a &gt; b <span class="keyword">or</span> <span class="keyword">not</span> b?
+                    <span class="keyword">return</span> -<span class="number">1</span>*dir <span class="keyword">if</span> a &lt; b <span class="keyword">or</span> <span class="keyword">not</span> a?
+
+                <span class="property">@collection</span>.sort()
+
+
+        updateHeaderArrows : (field, old_field) -&gt;
+
+            re = <span class="keyword">new</span> RegExp(<span class="string">" (<span class="subst">#{_.values(@sortArrows).join("|")}</span>)$|$"</span>)
+            dir = <span class="property">@sortingDirection</span>[field] ? <span class="number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Remove arrows from previously sorted label.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">if</span> old_field?
+                <span class="property">@$header</span>.find(<span class="string">"[data-sort-by='<span class="subst">#{old_field}</span>'] .arrow"</span>).remove()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Put arrows on currently sorted label.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>el = $ <span class="string">"&lt;span /&gt;"</span>, class: <span class="string">"arrow"</span>, text: <span class="property">@sortArrows</span>[dir]
+            <span class="property">@$header</span>.find(<span class="string">"[data-sort-by='<span class="subst">#{field}</span>']"</span>).append el
+
+    
+        initializeHotKeys: -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Register this view</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@keyboardNamespace</span> = <span class="property">@keyboardManager</span>.registerView <span class="keyword">this</span>, <span class="property">@plural</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Bind jump key.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">if</span> <span class="property">@jumpkey</span>?
+                <span class="property">@keyboardManager</span>.registerJumpKey 
+                    label: <span class="property">@plural</span>()
+                    jumpkey: <span class="property">@jumpkey</span>
+                    context: <span class="keyword">this</span>
+                    callback: =&gt;
+                        <span class="property">@$</span>(<span class="property">@jumpSelector</span>).focus()
+                    precondition: =&gt;
+                        <span class="property">@$el</span>.<span class="keyword">is</span> <span class="string">":visible"</span>
+
+            <span class="keyword">unless</span> <span class="property">@suppressHotKeys</span>
+
+                hotkeys = [
+                    hotkey: <span class="string">"j"</span>
+                    label: <span class="string">"Focus next item"</span>
+                    callback: =&gt;
+                        $(document.activeElement).nextAll(<span class="string">".item:visible:not(.disabled):first"</span>).focus()
+                ,
+                    hotkey: <span class="string">"J"</span>
+                    label: <span class="string">"Focus last item"</span>
+                    callback: =&gt;
+                        <span class="property">@$list</span>.find(<span class="string">".item:last"</span>).focus()
+                ,
+                    hotkey: <span class="string">"k"</span> 
+                    label: <span class="string">"Focus previous item"</span>
+                    callback: =&gt;
+                        $(document.activeElement).prevAll(<span class="string">".item:visible:not(.disabled):first"</span>).focus()
+                ,
+                    hotkey: <span class="string">"K"</span>
+                    label: <span class="string">"Focus first item"</span>
+                    callback: =&gt;
+                        <span class="property">@$list</span>.find(<span class="string">".item:first"</span>).focus()
+                ,
+                    hotkey: <span class="string">"x"</span>
+                    label: <span class="string">"Select/deselect item"</span>
+                    callback: =&gt;
+                        <span class="property">@toggleFocussedSelected</span>()
+                ,
+                    hotkey: <span class="string">"X"</span>
+                    label: <span class="string">"Select/deselect all"</span>
+                    callback: =&gt;
+                        <span class="property">@toggleSelected</span>()
+                ,
+                    hotkey: <span class="string">"_"</span>
+                    label: <span class="string">"Expand/collapse list"</span>
+                    callback: =&gt;
+                        <span class="property">@toggleVisibility</span>()
+                ,
+                    hotkey: <span class="string">"R"</span>
+                    label: <span class="string">"Refresh items"</span>
+                    callback: =&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>refresh collection (from server)</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@refresh</span>()
+                ]
+
+
+                <span class="keyword">for</span> hotkey <span class="keyword">in</span> hotkeys
+                    hotkey.namespace = <span class="property">@keyboardNamespace</span>
+                    <span class="property">@keyboardManager</span>.registerHotKey hotkey
+
+        keypressed : (event) -&gt;
+            <span class="property">@trigger</span> <span class="string">"keypressed"</span>, event
+            <span class="property">@keyboardManager</span>.handleKeypress event, <span class="property">@keyboardNamespace</span>
+    
+        refresh: -&gt;
+            <span class="keyword">if</span> <span class="property">@collection</span>.url?
+                <span class="property">@trigger</span> <span class="string">'refresh'</span>
+                <span class="property">@collection</span>.fetch
+                    success: =&gt;
+                        <span class="property">@$list</span>.find(<span class="string">".item:first"</span>)?.focus()
+
+        focusin : (event) -&gt;
+            <span class="keyword">unless</span> <span class="property">@focussed</span>
+                <span class="property">@focussed</span> = <span class="literal">true</span>
+            <span class="property">@$el</span>.addClass <span class="string">"focussed"</span>
+            <span class="property">@collection</span>?.trigger <span class="string">"focusin"</span>
+    
+        focusout : (event) -&gt;
+            <span class="keyword">if</span> <span class="property">@focussed</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>need to delay to find the proper next document.activeElement</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>setTimeout =&gt;
+                    <span class="keyword">if</span> <span class="property">@$</span>(document.activeElement).length <span class="keyword">is</span> <span class="number">0</span>
+                        <span class="property">@$el</span>.removeClass <span class="string">"focussed"</span>
+                    <span class="property">@focussed</span> = <span class="literal">false</span>
+                    <span class="property">@collection</span>?.trigger <span class="string">"focusout"</span>
+                , <span class="number">10</span>
+        
+        plural : -&gt;
+            <span class="property">@itemNamePlural</span> ? <span class="property">@itemName</span> + <span class="string">"s"</span>
+
+        
+        addItem : (model) -&gt;
+            <span class="keyword">if</span> Backbone.View::isPrototypeOf(<span class="property">@itemView</span>::)
+                itemView = <span class="property">@itemView</span>
+            <span class="keyword">else</span>
+                itemView = <span class="property">@itemView</span>(model)
+            view = <span class="keyword">new</span> itemView model: model, view: <span class="keyword">this</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Respect collection insertion order</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>idx = <span class="property">@collection</span>.indexOf model
+            <span class="keyword">if</span> <span class="property">@$list</span>.children().size() <span class="keyword">in</span> [<span class="number">0</span>, idx]
+                <span class="property">@$list</span>.append view.el
+            <span class="keyword">else</span>
+                <span class="property">@$list</span>.children(<span class="string">":nth-child(<span class="subst">#{ idx + <span class="number">1</span> }</span>)"</span>).before view.el
+
+            view.render() <span class="keyword">if</span> <span class="property">@$el</span>.<span class="keyword">is</span> <span class="string">":visible"</span>
+            <span class="property">@subviews</span>(<span class="string">"list"</span>).push view
+            view.select() <span class="keyword">if</span> <span class="property">@selectedByDefault</span>
+
+        addAllItems : -&gt;
+            <span class="property">@removeSubviews</span> <span class="string">"list"</span>
+            <span class="property">@$list</span>.empty()
+            <span class="property">@collection</span>?.each <span class="property">@addItem</span>, <span class="keyword">this</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Gets list item view by model ID</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>get: (id) -&gt;
+            _.find <span class="property">@subviews</span>(<span class="string">"list"</span>), (view) -&gt;
+                view.model.id == id</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Gets list item view by CID</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>getByCid: (cid) -&gt;
+            _.find <span class="property">@subviews</span>(<span class="string">"list"</span>), (view) -&gt;
+                view.model.cid == cid</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>initializing</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>initializeTitle: -&gt; 
+            title = <span class="property">@title</span> ? <span class="property">@plural</span>()
+            title = title.call <span class="keyword">this</span> <span class="keyword">if</span> _.isFunction title
+            $title = $ <span class="string">"&lt;h1 /&gt;"</span>, class: <span class="string">"title"</span>, text: title
+            $title
+
+        renderTitle: -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>do nothing</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>initializeActions: -&gt;
+            
+            <span class="property">@removeSubviews</span> <span class="string">"action"</span>
+
+            $batchActions = $ <span class="string">"&lt;ul/&gt;"</span>, class: <span class="string">"actions"</span>
+
+            <span class="property">@allActions</span> = <span class="keyword">new</span> Ribs.Actions <span class="property">@actions</span>, ribs: <span class="keyword">this</span>
+            
+            <span class="property">@inlineActions</span> = <span class="property">@allActions</span>.where inline: <span class="literal">true</span>
+
+            <span class="property">@batchActions</span> = <span class="property">@allActions</span>.where batch: <span class="literal">true</span>
+
+            <span class="keyword">for</span> action <span class="keyword">in</span> <span class="property">@batchActions</span>
+                view = <span class="keyword">new</span> <span class="property">@actionView</span> model: action
+                <span class="property">@subviews</span>(<span class="string">"action"</span>).push view
+                $batchActions.append view.el
+                view.render()
+
+            $batchActions
+
+        renderActions: -&gt;
+            <span class="keyword">for</span> view <span class="keyword">in</span> <span class="property">@subviews</span>(<span class="string">"action"</span>)
+                view.render() 
+        
+        initializeList: -&gt;
+            $list = $ <span class="string">"&lt;ul/&gt;"</span>, class: <span class="string">"list"</span>
+            $list
+
+        renderList: -&gt;
+            <span class="keyword">for</span> view <span class="keyword">in</span> <span class="property">@subviews</span>(<span class="string">"list"</span>)
+                view.render() 
+                view.delegateEvents()
+
+        initializeHeader: -&gt;
+            $header = $ <span class="string">"&lt;div /&gt;"</span>, class: <span class="string">"header"</span>
+
+            <span class="keyword">unless</span> <span class="property">@suppressToggle</span>
+                toggle = $ <span class="string">"&lt;input /&gt;"</span>, 
+                    type: <span class="string">"checkbox"</span>, 
+                    checked: <span class="property">@selectedByDefault</span>
+                $header.append $ <span class="string">"&lt;div /&gt;"</span>, class:<span class="string">"toggle"</span>, html: toggle
+
+            <span class="keyword">unless</span> <span class="property">@displayAttributes</span>?
+                attributes = _.map <span class="property">@collection</span>.first().toJSON(), (v,k) -&gt; 
+                    { field: k }
+            <span class="property">@displayAttributeMap</span> = {}
+            _.each <span class="property">@displayAttributes</span>, (attribute) =&gt;
+                <span class="property">@displayAttributeMap</span>[attribute.field] = attribute
+                label = attribute.label ? attribute.field
+                klass = attribute.<span class="class"><span class="keyword">class</span> ? <span class="title">attribute</span>.<span class="title">field</span></span>
+                field = $ <span class="string">"&lt;div/&gt;"</span>, 
+                    class: klass
+                    <span class="string">"data-sort-by"</span>: (attribute.sortField <span class="keyword">or</span> attribute.field)
+                field.append label
+                $header.append field
+
+            $header
+
+        renderHeader: -&gt;
+            n = <span class="property">@getNumSelected</span>()
+            l = <span class="property">@getNumTotal</span>()
+            <span class="property">@selectedByDefault</span> = <span class="literal">true</span> <span class="keyword">if</span> n &gt;= l
+            <span class="property">@selectedByDefault</span> = <span class="literal">false</span> <span class="keyword">if</span> n <span class="keyword">is</span> <span class="number">0</span>
+            isChecked = n <span class="keyword">isnt</span> <span class="number">0</span>
+            isTransparent = isChecked <span class="keyword">and</span> n &lt; l
+            opacity = <span class="keyword">if</span> isTransparent <span class="keyword">then</span> <span class="number">0.5</span> <span class="keyword">else</span> <span class="number">1</span>
+            <span class="property">@$header</span>.find(<span class="string">".toggle input"</span>)
+                .prop(<span class="string">"checked"</span>, isChecked)
+                .css(<span class="string">"opacity"</span>, opacity)
+
+        initializeFooter: -&gt;
+            $footer = $ <span class="string">"&lt;div/&gt;"</span>, class: <span class="string">"footer"</span>
+            $footer
+
+        renderFooter : -&gt;
+            plural = <span class="property">@getNumTotal</span>() <span class="keyword">isnt</span> <span class="number">1</span>
+            word = <span class="keyword">if</span> plural <span class="keyword">then</span> <span class="property">@plural</span>() <span class="keyword">else</span> <span class="property">@itemName</span>
+            <span class="property">@$footer</span>.text <span class="string">"<span class="subst">#{@getNumSelected()}</span> / <span class="subst">#{@getNumTotal()}</span> <span class="subst">#{word}</span> selected"</span>
+
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">ListItem</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">View</span></span>
+
+        tagName: <span class="string">"li"</span>
+
+        className: <span class="string">"item"</span>
+
+        attributes:
+            tabindex: <span class="number">0</span>
+
+        _ribsEvents:
+            <span class="string">'click'</span> : <span class="string">'toggle'</span>
+            <span class="string">'toggle'</span> : <span class="string">'toggle'</span>
+            <span class="string">'selectitem'</span> : <span class="string">'select'</span>
+            <span class="string">'deselectitem'</span> : <span class="string">'deselect'</span>
+            <span class="string">'click a'</span> : <span class="string">'stopPropogation'</span>
+
+        constructor : (options) -&gt;
+
+            <span class="property">@events</span> ||= {}
+            _.extend <span class="property">@events</span>, <span class="property">@_ribsEvents</span>
+
+            <span class="property">@itemCellView</span> ?= Ribs.ListItemCell
+            <span class="property">@actionView</span> ?= Ribs.InlineAction
+            <span class="property">@view</span> = options?.view</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>create cell views</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@listItemCells</span> = []
+            <span class="keyword">for</span> attribute <span class="keyword">in</span> <span class="property">@view</span>.displayAttributes
+                attribute = _.clone(attribute)
+                attribute.view = @
+                attribute.model = options.model
+                listItemCell = <span class="keyword">new</span> <span class="property">@itemCellView</span> attribute
+                <span class="property">@listItemCells</span>.push listItemCell
+
+            <span class="property">@inlineActions</span> = []
+            <span class="keyword">for</span> key, action <span class="keyword">of</span> <span class="property">@view</span>.inlineActions
+                <span class="keyword">unless</span> action.filter? <span class="keyword">and</span> action.filter(<span class="property">@model</span>) <span class="keyword">is</span> <span class="literal">false</span>
+                    inlineAction = <span class="keyword">new</span> <span class="property">@actionView</span>
+                        model: action
+                        listItem: <span class="keyword">this</span>
+                    <span class="property">@inlineActions</span>.push inlineAction
+
+            <span class="keyword">super</span>
+
+            <span class="keyword">if</span> <span class="property">@model</span>?
+                <span class="property">@listenTo</span> <span class="property">@model</span>, <span class="string">"change"</span>, <span class="property">@render</span>
+                <span class="property">@listenTo</span> <span class="property">@model</span>, <span class="string">"remove"</span>, <span class="property">@remove</span>
+  
+        render : -&gt;
+
+            <span class="property">@$el</span>.empty()
+            <span class="keyword">return</span> <span class="keyword">unless</span> <span class="property">@model</span>
+            <span class="property">@$el</span>.data(<span class="string">"cid"</span>, <span class="property">@model</span>.cid)
+
+            <span class="keyword">unless</span> <span class="property">@view</span>.suppressToggle
+                toggle = $ <span class="string">"&lt;input/&gt;"</span>,
+                    type: <span class="string">"checkbox"</span>
+                    tabindex: -<span class="number">1</span>
+                <span class="keyword">if</span> <span class="property">@$el</span>.<span class="keyword">is</span> <span class="string">".selected"</span>
+                    $(toggle).prop <span class="string">"checked"</span>, <span class="literal">true</span>
+                div = $ <span class="string">"&lt;div/&gt;"</span>, class: <span class="string">"toggle"</span>
+                div.append toggle
+                <span class="property">@$el</span>.append div</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Render our individual cells</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">for</span> cell <span class="keyword">in</span> <span class="property">@listItemCells</span>
+                <span class="property">@$el</span>.append cell.el
+                cell.render()
+                cell.delegateEvents()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Add inline actions.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>ul = $ <span class="string">"&lt;ul/&gt;"</span>, class: <span class="string">"actions"</span>
+            <span class="keyword">for</span> inlineAction <span class="keyword">in</span> <span class="property">@inlineActions</span>
+                $(ul).append inlineAction.el
+                inlineAction.render()
+                inlineAction.delegateEvents()
+            <span class="property">@$el</span>.append ul
+            
+            <span class="keyword">this</span>
+
+        toggle: -&gt;
+            <span class="keyword">unless</span> <span class="property">@$el</span>.<span class="keyword">is</span>(<span class="string">".disabled"</span>)
+                <span class="keyword">if</span> <span class="property">@$el</span>.<span class="keyword">is</span>(<span class="string">".selected"</span>)
+                    <span class="property">@deselect</span>()
+                <span class="keyword">else</span>
+                    <span class="property">@select</span>()
+
+        stopPropogation: (e) -&gt;
+            e.stopImmediatePropagation()
+
+        select: (event, options={})-&gt;
+            <span class="keyword">return</span> <span class="keyword">if</span> <span class="property">@view</span>.suppressToggle
+            <span class="property">@$el</span>.addClass <span class="string">"selected"</span>
+            <span class="property">@$</span>(<span class="string">"input:checkbox"</span>).prop <span class="string">"checked"</span>, <span class="literal">true</span>
+            <span class="property">@model</span>.trigger <span class="string">"selected"</span> <span class="keyword">unless</span> options.silent
+
+        deselect : (event, options={})-&gt;
+            <span class="keyword">return</span> <span class="keyword">if</span> <span class="property">@view</span>.suppressToggle
+            <span class="property">@$el</span>.removeClass <span class="string">"selected"</span>
+            <span class="property">@$</span>(<span class="string">"input:checkbox"</span>).prop <span class="string">"checked"</span>, <span class="literal">false</span>
+            <span class="property">@model</span>.trigger <span class="string">"deselected"</span> <span class="keyword">unless</span> options.silent
+
+        enable : -&gt;
+            <span class="property">@$el</span>.removeClass <span class="string">"disabled"</span>
+            <span class="property">@$</span>(<span class="string">"input:checkbox"</span>).prop <span class="string">"disabled"</span>, <span class="literal">false</span>
+            <span class="property">@$el</span>.prop <span class="string">"tabindex"</span>, <span class="number">0</span>
+            <span class="property">@model</span>.trigger <span class="string">"enabled"</span>
+
+        disable :-&gt; 
+            <span class="property">@$el</span>.addClass <span class="string">"disabled"</span>
+            <span class="property">@$</span>(<span class="string">"input:checkbox"</span>).prop <span class="string">"disabled"</span>, <span class="literal">true</span>
+            <span class="property">@$el</span>.prop <span class="string">"tabindex"</span>, -<span class="number">1</span>
+            <span class="property">@model</span>.trigger <span class="string">"disabled"</span>
+
+        remove: -&gt;
+            <span class="property">@deselect</span>()
+            <span class="keyword">for</span> inlineAction <span class="keyword">in</span> <span class="property">@inlineActions</span>
+                inlineAction.remove()
+            <span class="keyword">for</span> listItemCell <span class="keyword">in</span> <span class="property">@listItemCells</span>
+                listItemCell.remove()
+            <span class="keyword">super</span>
+
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">ListItemCell</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">View</span></span>
+  
+        tagName : <span class="string">"div"</span>
+
+        className: <span class="string">"cell"</span>
+    
+        _ribsEvents:
+            <span class="string">'click .edit'</span> : <span class="string">'edit'</span>
+            <span class="string">'click .editableField'</span> : <span class="string">'stopPropagation'</span>
+            <span class="string">'keypress .editableField'</span> : <span class="string">'handleKeypress'</span>
+            <span class="string">'blur .editableField'</span> : <span class="string">'saveEditedField'</span>
+  
+        constructor : (options) -&gt;
+
+            <span class="property">@events</span> ||= {}
+            _.extend <span class="property">@events</span>, <span class="property">@_ribsEvents</span>
+            <span class="keyword">super</span>
+            <span class="property">@$el</span>.addClass(<span class="property">@options</span>.<span class="class"><span class="keyword">class</span> ? @<span class="title">options</span>.<span class="title">field</span>)</span>
+
+        renderableValue: (nomap) -&gt;
+             
+            value = <span class="property">@model</span>.get <span class="property">@options</span>.field
+
+            <span class="keyword">if</span> !nomap <span class="keyword">and</span> _.isFunction <span class="property">@options</span>.map
+                value = <span class="property">@options</span>.map.call <span class="property">@options</span>.view.view, value, <span class="property">@model</span>
+            value ? <span class="string">""</span>
+
+        render: ()-&gt;
+            <span class="property">@$el</span>.empty()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>cells are rendered as text by default unless <code>escape</code> is false</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">if</span> <span class="property">@options</span>.escape <span class="keyword">is</span> <span class="literal">false</span>
+                <span class="property">@$el</span>.html <span class="property">@renderableValue</span>()
+            <span class="keyword">else</span>
+                <span class="property">@$el</span>.text <span class="property">@renderableValue</span>()
+
+            <span class="keyword">if</span> <span class="property">@options</span>.editable <span class="keyword">is</span> <span class="literal">true</span>
+                label = <span class="property">@options</span>.label ? <span class="property">@options</span>.field
+                editBtnEl = $ <span class="string">"&lt;span/&gt;"</span>,
+                    class: <span class="string">'edit button inline'</span>, 
+                    title: <span class="string">"Edit <span class="subst">#{label}</span>"</span>
+                    text: <span class="string">'✎'</span>
+                <span class="keyword">if</span> <span class="property">@model</span>.get(<span class="property">@options</span>.field) <span class="keyword">in</span> [<span class="literal">undefined</span>, <span class="literal">null</span>, <span class="string">''</span>]
+                    $(editBtnEl).addClass(<span class="string">'show'</span>)
+                <span class="keyword">else</span>
+                    $(editBtnEl).removeClass(<span class="string">'show'</span>)
+
+                <span class="property">@$el</span>.append(editBtnEl) 
+
+            <span class="keyword">this</span>
+
+        edit: (event) -&gt;
+
+            <span class="keyword">if</span> <span class="property">@options</span>.editable <span class="keyword">is</span> <span class="literal">true</span>
+
+                value = <span class="property">@model</span>.get <span class="property">@options</span>.field
+
+                <span class="keyword">if</span> _.isFunction <span class="property">@options</span>.edit</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>edit = function could return an html element</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>editField = <span class="property">@options</span>.edit.call <span class="keyword">this</span>, value, <span class="property">@model</span>
+                <span class="keyword">else</span> <span class="keyword">if</span> _.isArray <span class="property">@options</span>.edit</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>edit = array will give a select box</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>editField = $ <span class="string">"&lt;select/&gt;"</span>
+                    <span class="keyword">for</span> option <span class="keyword">in</span> <span class="property">@options</span>.edit
+                        optionEl = $ <span class="string">"&lt;option/&gt;"</span>, 
+                            value: option
+                            text: option
+                            selected: option <span class="keyword">is</span> value
+                        editField.append optionEl
+                <span class="keyword">else</span> <span class="keyword">if</span> _.isObject <span class="property">@options</span>.edit</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>edit = object will give a select box</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>editField = $ <span class="string">"&lt;select/&gt;"</span>
+                    <span class="keyword">for</span> key, option <span class="keyword">of</span> <span class="property">@options</span>.edit
+                        optionEl = $ <span class="string">"&lt;option/&gt;"</span>, 
+                            value: key
+                            text: option
+                            selected: key <span class="keyword">is</span> value
+                        editField.append optionEl
+                <span class="keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>no edit property will default to a text box</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>editField = $ <span class="string">"&lt;input/&gt;"</span>, 
+                        type: <span class="string">'text'</span>
+                        value: value 
+
+                <span class="keyword">if</span> _.isElement(editField) <span class="keyword">or</span> editField <span class="keyword">instanceof</span> jQuery
+                    $(editField).addClass <span class="string">"editableField"</span>
+                    <span class="property">@$el</span>.html editField
+                    $(editField).focus()
+
+            <span class="literal">false</span>
+
+        stopPropagation: (e) -&gt;
+            <span class="literal">false</span>
+
+        saveEditedField: -&gt;
+            editField = <span class="property">@$</span>(<span class="string">".editableField"</span>)
+            <span class="keyword">if</span> _.isFunction <span class="property">@options</span>.save
+                <span class="property">@options</span>.save.call <span class="keyword">this</span>, editField, <span class="property">@model</span>
+            <span class="keyword">else</span>
+                value = editField.val()
+                changeSet = $.extend <span class="literal">true</span>, {}, <span class="property">@model</span>.attributes
+                changeSet[<span class="property">@options</span>.field] = value
+
+                <span class="keyword">unless</span> <span class="property">@model</span>._validate(changeSet, <span class="property">@model</span>)
+                    <span class="keyword">return</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>do whatever it takes to re-render</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">try</span>
+                    <span class="property">@model</span>.save changeSet, 
+                        success: =&gt; <span class="property">@render</span>()
+                        error: =&gt; <span class="property">@render</span>()
+                <span class="keyword">catch</span> e
+                    <span class="property">@render</span>()
+        
+        handleKeypress: (e)-&gt;
+            <span class="keyword">if</span> e.which <span class="keyword">is</span> <span class="number">13</span>
+                <span class="property">@saveEditedField</span>()
+                <span class="literal">false</span>
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">Action</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">Model</span></span>
+
+        defaults:
+            min : <span class="number">1</span>
+            max : -<span class="number">1</span> <span class="comment"># -1 means no maximum</span>
+            arity : <span class="literal">null</span> <span class="comment"># defining arity will override min/max</span>
+            check : <span class="literal">null</span> <span class="comment"># defining check will be additional to min/max/arity</span>
+            batch: <span class="literal">true</span>
+            inline: <span class="literal">false</span>
+
+        initialize: (attributes, options) -&gt;
+
+            <span class="property">@ribs</span> = options.ribs ? <span class="property">@collection</span>.ribs
+
+            <span class="keyword">if</span> <span class="property">@has</span> <span class="string">"actions"</span>
+                <span class="property">@actions</span> = <span class="keyword">new</span> Ribs.Actions <span class="property">@get</span>(<span class="string">"actions"</span>), ribs: <span class="property">@ribs</span>
+                <span class="property">@min</span> = <span class="number">0</span>
+
+            <span class="keyword">if</span> <span class="property">@has</span>(<span class="string">"hotkey"</span>) <span class="keyword">and</span> <span class="keyword">not</span> <span class="property">@ribs</span>.suppressHotKeys
+                <span class="property">@ribs</span>.keyboardManager?.registerHotKey
+                    hotkey: <span class="property">@get</span> <span class="string">"hotkey"</span>
+                    label: <span class="property">@get</span> <span class="string">"label"</span>
+                    namespace: <span class="property">@ribs</span>.keyboardNamespace
+                    context: <span class="keyword">this</span>
+                    precondition: <span class="property">@allowed</span>
+                    callback: =&gt;
+                        <span class="property">@activate</span>()
+    
+        allowed : (selected) -&gt;
+
+            selected = <span class="property">@getSelected</span>() <span class="keyword">unless</span> selected?
+
+            l = selected.length
+    
+            allow = <span class="literal">false</span>
+    
+            <span class="keyword">if</span> <span class="property">@get</span>(<span class="string">"arity"</span>)?
+                a = <span class="property">@get</span> <span class="string">"arity"</span>
+                r1 = a <span class="keyword">is</span> l       <span class="comment"># arity is same as #selected</span>
+                r2 = a <span class="keyword">is</span> -<span class="number">1</span>      <span class="comment"># arity is anything</span>
+                allow = r1 <span class="keyword">or</span> r2
+            <span class="keyword">else</span>
+                r1 = <span class="property">@get</span>(<span class="string">"min"</span>) <span class="keyword">is</span> -<span class="number">1</span> <span class="keyword">or</span> l &gt;= <span class="property">@get</span>(<span class="string">"min"</span>)   <span class="comment"># minimum requirement is satisfied</span>
+                r2 = <span class="property">@get</span>(<span class="string">"max"</span>) <span class="keyword">is</span> -<span class="number">1</span> <span class="keyword">or</span> l &lt;= <span class="property">@get</span>(<span class="string">"max"</span>)   <span class="comment"># maximum requirement is satisfied</span>
+                allow = r1 <span class="keyword">and</span> r2
+    
+            <span class="keyword">if</span> allow <span class="keyword">and</span> <span class="property">@get</span>(<span class="string">"check"</span>)?
+                allow = <span class="property">@get</span>(<span class="string">"check"</span>).call(<span class="property">@ribs</span>, selected)
+    
+            allow
+
+        activate: (selected, listItem)-&gt;
+            selected = <span class="property">@getSelected</span>() <span class="keyword">unless</span> selected?
+            <span class="property">@get</span>(<span class="string">"activate"</span>).call <span class="property">@ribs</span>, selected, listItem
+
+        getSelected: -&gt;
+            <span class="property">@ribs</span>.getSelected()
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">Actions</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">Collection</span></span>
+
+        model: Ribs.Action
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">BatchAction</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">View</span></span>
+  
+        tagName : <span class="string">"li"</span>
+
+        className: <span class="string">"action"</span>
+    
+        events:
+            <span class="string">'click'</span>: <span class="string">'activateIfAllowed'</span>
+            <span class="string">'keypress'</span>: <span class="string">'keypressed'</span>
+
+        attributes:
+            tabindex: <span class="number">0</span>
+  
+        render : -&gt;
+
+            btn = $ <span class="string">"&lt;div/&gt;"</span>, 
+                class: <span class="string">"button"</span>
+                title: <span class="property">@label</span>(<span class="literal">false</span>)
+                html: <span class="property">@label</span>()
+
+            <span class="property">@$el</span>.html btn
+
+            <span class="keyword">if</span> <span class="property">@model</span>.actions
+
+                cont = $ <span class="string">"&lt;ul/&gt;"</span>, 
+                    class: <span class="string">"dropdown"</span>
+                    title: <span class="property">@label</span>(<span class="literal">false</span>)
+
+                <span class="property">@model</span>.actions.each (action) -&gt;
+                    view = <span class="keyword">new</span> Ribs.BatchAction model: action
+                    $(cont).append view.el
+                    view.render()
+
+                $(btn).append cont
+
+            <span class="keyword">else</span>
+
+                <span class="property">@checkRequirements</span>()
+
+            <span class="keyword">this</span>
+
+        label: (highlight=<span class="literal">true</span>)-&gt;
+            label = <span class="property">@model</span>.get(<span class="string">"batchLabel"</span>) ? <span class="property">@model</span>.get(<span class="string">"label"</span>)
+            <span class="keyword">if</span> highlight <span class="keyword">and</span> <span class="property">@model</span>.has <span class="string">"hotkey"</span>
+                label = <span class="property">@constructor</span>.highlightHotkey label, <span class="property">@model</span>.get <span class="string">"hotkey"</span>
+            label
+
+        getSelected: -&gt;
+            <span class="property">@model</span>.getSelected()
+
+        getListItem: -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>override</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>checkRequirements: -&gt;
+            <span class="property">@setEnabled</span> <span class="property">@model</span>.allowed <span class="property">@getSelected</span>()
+    
+        setEnabled : (enabled) -&gt;
+            <span class="property">@$el</span>.toggleClass <span class="string">"disabled"</span>, <span class="keyword">not</span> enabled
+            idx = <span class="keyword">if</span> enabled <span class="keyword">then</span> <span class="number">0</span> <span class="keyword">else</span> -<span class="number">1</span>
+            <span class="property">@$el</span>.prop <span class="string">"tabindex"</span>, idx
+
+        activateIfAllowed: (event) -&gt;
+            <span class="keyword">unless</span> <span class="property">@$el</span>.<span class="keyword">is</span> <span class="string">".disabled"</span>
+                <span class="property">@model</span>.activate <span class="property">@getSelected</span>(), <span class="property">@getListItem</span>()
+            <span class="literal">false</span>
+
+        activate: (event) -&gt;
+            <span class="property">@model</span>.activate <span class="property">@getSelected</span>(), <span class="property">@getListItem</span>()
+            <span class="literal">false</span>
+
+        keypressed : (event) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>activate on <return></p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">if</span> event.which <span class="keyword">is</span> <span class="number">13</span>
+                <span class="property">@activate</span>()
+                <span class="literal">false</span>
+
+        <span class="property">@highlightHotkey</span> : (label, hotkey) -&gt;
+            template = _.template <span class="string">"&lt;span class='hotkey'&gt;&lt;strong&gt;&lt;%= hotkey %&gt;&lt;/strong&gt;&lt;/span&gt;"</span>
+            new_label = label.replace hotkey, template hotkey: hotkey
+            <span class="keyword">if</span> new_label <span class="keyword">is</span> label
+                new_label = <span class="string">"<span class="subst">#{label}</span> <span class="subst">#{ template hotkey: "[#{hotkey}</span>]"</span>}<span class="string">"
+            new_label
+
+    class Ribs.InlineAction extends Ribs.BatchAction
+
+        label: -&gt;
+            label = @model.get("</span>inlineLabel<span class="string">") ? @model.get("</span>label<span class="string">")
+            if _.isFunction label
+                label = label.call @model, @options.listItem.model
+            label
+
+        getSelected: -&gt;
+            [ @options.listItem.model ]
+
+        getListItem: -&gt;
+            @options.listItem</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

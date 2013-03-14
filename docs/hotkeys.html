@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>hotkeys.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="Changelog.html">
+                Changelog.md
+              </a>
+            
+              
+              <a class="source" href="README.html">
+                README.md
+              </a>
+            
+              
+              <a class="source" href="todos.html">
+                todos.js
+              </a>
+            
+              
+              <a class="source" href="hotkeys.html">
+                hotkeys.coffee
+              </a>
+            
+              
+              <a class="source" href="ribs.html">
+                ribs.coffee
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>hotkeys.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">do</span> ($=jQuery) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Make <code>Ribs</code> globally accessible.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>root = window ? module.exports
+    Ribs = root.Ribs ?= {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Keyboard manager access point</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>_keyboardManager = <span class="literal">null</span>
+    Ribs.<span class="function"><span class="title">getKeyboardManager</span></span> = -&gt;
+        _keyboardManager ?= <span class="keyword">new</span> Ribs.KeyboardManager()
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">KeyboardManager</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Internal char code tree for registered hot keys.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>boundCharCodes: {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>A registry for all views is required when showing hotkey help pane.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>registeredViews:
+            global:
+                bindings: []
+                tree: {}
+                label: <span class="string">"Global"</span>
+                context: window
+
+        options:</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Hotkey to preceed any jump keys.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>jumpPrefixKey: <span class="string">"g"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Time allowed between hotkeys</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>jumpTime: <span class="number">1000</span>
+
+            enableKeyboardShortcuts: <span class="literal">true</span>
+
+        constructor: (options) -&gt;
+
+            <span class="property">@options</span> = _.extend <span class="property">@options</span>, options
+
+            <span class="property">@registerHotKey</span>
+                hotkey: <span class="string">"?"</span>
+                callback: <span class="property">@showKeyboardBindings</span>
+                context: <span class="keyword">this</span>
+                label: <span class="string">"Show hotkeys"</span>
+
+            $(window).<span class="literal">on</span> <span class="string">"keypress"</span>, <span class="property">@handleKeypress</span>
+
+        registerView: (view, label) -&gt;
+            namespace = _.uniqueId <span class="string">"view"</span>
+            <span class="property">@registeredViews</span>[namespace] = 
+                label: label
+                context: view
+                tree: {}
+                bindings: []
+            namespace
+
+        deregisterView: (namespace) -&gt;
+            <span class="keyword">delete</span> <span class="property">@registeredViews</span>[namespace]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>options:
+ hotkey: string (required)
+ label: string (required - displayed in help screen)
+ callback: function (required)
+ context: object (optional)
+ namespace: string (optional)
+ precondition: function (optional)</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>registerHotKey: (options) -&gt;
+            options.charCodes ?= ( key.charCodeAt <span class="number">0</span> <span class="keyword">for</span> key <span class="keyword">in</span> options.hotkey.split <span class="string">""</span> )
+            ns = options.namespace ?= <span class="string">"global"</span>
+            root = <span class="property">@registeredViews</span>[ns].tree
+            <span class="keyword">for</span> code, i <span class="keyword">in</span> options.charCodes
+                root[code] ?= { bindings: [], upcoming: <span class="number">0</span> }
+                <span class="keyword">if</span> i <span class="keyword">is</span> options.charCodes.length - <span class="number">1</span>
+                    root[code].bindings.push options
+                <span class="keyword">else</span>
+                    root[code].upcoming += <span class="number">1</span>
+                root = root[code]
+            <span class="property">@registeredViews</span>[ns].bindings.push options
+            ns
+
+        deregisterHotKey: (options) -&gt;
+            options.charCodes ?= ( key.charCodeAt <span class="number">0</span> <span class="keyword">for</span> key <span class="keyword">in</span> options.hotkey.split <span class="string">""</span> )
+            ns = options.namespace ?= <span class="string">"global"</span>
+            root = current = <span class="property">@registeredViews</span>[ns].tree
+            <span class="keyword">for</span> code, i <span class="keyword">in</span> options.charCodes
+                current = current[code]
+                <span class="keyword">if</span> i <span class="keyword">is</span> options.charCodes.length - <span class="number">1</span>
+                    current.bindings = _.reject current.bindings, (binding) -&gt;
+                        (<span class="keyword">not</span> options.context <span class="keyword">or</span> options.context <span class="keyword">is</span> binding.context) <span class="keyword">and</span>
+                        (<span class="keyword">not</span> options.callback <span class="keyword">or</span> options.callback <span class="keyword">is</span> binding.callback)
+                <span class="keyword">else</span>
+                    current.upcoming -= <span class="number">1</span>
+
+        registerJumpKey: (options) -&gt;
+            options.label = <span class="string">"Go to <span class="subst">#{options.label}</span>"</span>
+            options.hotkey = <span class="property">@options</span>.jumpPrefixKey + options.jumpkey
+            <span class="property">@registerHotKey</span> options
+
+        deregisterJumpKey: (options) -&gt;
+            options.hotkey = <span class="property">@options</span>.jumpPrefixKey + options.jumpkey
+            <span class="property">@deregisterHotKey</span> options
+
+        handleKeypress: (event, namespace=<span class="string">"global"</span>) =&gt;
+
+            <span class="keyword">return</span> <span class="keyword">unless</span> <span class="property">@options</span>.enableKeyboardShortcuts</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>don&#39;t do anything if user is typing text</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">return</span> <span class="keyword">if</span> $(document.activeElement).<span class="keyword">is</span>(<span class="string">":input"</span>)
+
+            context = <span class="property">@currentContext</span> ? <span class="property">@registeredViews</span>[namespace].tree
+
+            <span class="property">@walkContext</span> context, event.which <span class="keyword">if</span> context?
+
+        walkContext: (context, charCode) -&gt;
+
+            clearTimeout <span class="property">@jumpTimeout</span> <span class="keyword">if</span> <span class="property">@jumpTimeout</span>
+            <span class="keyword">delete</span> <span class="property">@currentContext</span>
+            <span class="keyword">return</span> <span class="keyword">unless</span> charCode <span class="keyword">of</span> context
+
+            context = context[charCode]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>if there are no more possible hotkey matches, execute immediately</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="keyword">if</span> context.upcoming <span class="keyword">is</span> <span class="number">0</span>
+                <span class="property">@execute</span> context
+            <span class="keyword">else</span>
+                <span class="property">@currentContext</span> = context
+                <span class="property">@jumpTimeout</span> = setTimeout =&gt;
+                    <span class="keyword">delete</span> <span class="property">@currentContext</span>
+                    <span class="property">@execute</span> context
+                , <span class="property">@options</span>.jumpTime
+
+            <span class="literal">false</span>
+
+        execute: (context) -&gt;
+            <span class="keyword">if</span> context.bindings.length
+                <span class="keyword">for</span> binding <span class="keyword">in</span> context.bindings
+                    ctx = binding.context ? <span class="property">@registeredViews</span>[binding.namespace].context
+                    <span class="keyword">unless</span> binding.precondition <span class="keyword">and</span> <span class="keyword">not</span> binding.precondition.call ctx
+                        binding.callback.call ctx</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Function which will construct/display applicable keyboard shortcuts 
+in an overlay.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre>showKeyboardBindings: -&gt;
+            <span class="property">@constructor</span>.view?.$el.remove()
+            view = <span class="property">@constructor</span>.view = <span class="keyword">new</span> Ribs.KeyboardHelpView
+                views: <span class="property">@registeredViews</span>
+                hotkeys: <span class="property">@boundCharCodes</span>
+
+            view.render()
+
+            $(<span class="string">"body"</span>).append view.el
+            
+                
+
+    <span class="class"><span class="keyword">class</span> <span class="title">Ribs</span>.<span class="title">KeyboardHelpView</span> <span class="keyword">extends</span> <span class="title">Backbone</span>.<span class="title">View</span></span>
+
+        className: <span class="string">"ribs-keyboard-shortcuts-overlay"</span>
+
+        events: 
+            <span class="string">'click'</span> : <span class="string">"remove"</span>
+
+        initialize:  -&gt;
+            $(window).<span class="literal">on</span> <span class="string">"keyup"</span>, <span class="property">@handleKeyup</span>
+
+        remove: -&gt;
+            $(window).<span class="literal">off</span> <span class="string">"keyup"</span>, <span class="property">@handleKeyup</span>
+            <span class="keyword">super</span>
+
+        handleKeyup: (event) =&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p><strong><return></strong> or <strong><esc></strong> will remove overlay.</p>
+
+            </div>
+            
+            <div class="content"><div class="highlight"><pre><span class="property">@remove</span>() <span class="keyword">if</span> event.which <span class="keyword">is</span> <span class="number">27</span>
+            <span class="literal">false</span>
+
+        render: -&gt;
+            <span class="property">@$el</span>.empty()
+
+            <span class="keyword">for</span> namespace, view <span class="keyword">of</span> <span class="property">@options</span>.views
+                <span class="keyword">unless</span> $(view.context?.el).<span class="keyword">is</span> <span class="string">":hidden"</span>
+                    h1 = $ <span class="string">"&lt;h1/&gt;"</span>, text: view.label
+                    ul = $ <span class="string">"&lt;ul/&gt;"</span>
+                    <span class="keyword">for</span> binding <span class="keyword">in</span> view.bindings
+                        li = $ <span class="string">"&lt;li/&gt;"</span>, class: <span class="string">"hotkey"</span>
+                        li.append $ <span class="string">"&lt;span/&gt;"</span>, class: <span class="string">"key"</span>, text: binding.hotkey
+                        li.append $ <span class="string">"&lt;span/&gt;"</span>, class: <span class="string">"action"</span>, text: binding.label
+                        ul.append li
+                    <span class="property">@$el</span>.append h1, ul</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
